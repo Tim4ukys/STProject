@@ -251,20 +251,13 @@ void ll_mul1(Longlong* pres, int32_t x, int32_t y) {
 
 void ll_mul(Longlong* pres, Longlong* px, Longlong* py) {
     ll_assign_long(pres, 0);
-    Longlong x, y, tmp;
-    ll_assign(&x, px);
-    ll_assign(&y, py);
-    ll_abs(&x);
-    ll_abs(&y);
-    
-    ll_umul1(&tmp, x.hi, y.lo);
+    Longlong tmp;
+
+    ll_umul1(&tmp, px->hi, py->lo);
     ll_add(pres, pres, &tmp);
-    ll_umul1(&tmp, x.lo, y.hi);
+    ll_umul1(&tmp, px->lo, py->hi);
     ll_add(pres, pres, &tmp);
     ll_shiftleft(pres, 32);
-    ll_umul1(&tmp, x.lo, y.lo);
+    ll_umul1(&tmp, px->lo, py->lo);
     ll_add(pres, pres, &tmp);
-
-    if (ll_sign(px) != ll_sign(py))
-        ll_negate(pres);
 }
