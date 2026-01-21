@@ -9,6 +9,8 @@ typedef struct {
     uint32_t lo, hi;
 } Longlong;
 
+void ll_assign_longlong(Longlong* pll, uint64_t x);
+
 /* присваивает (*pll) <- (*pll2) */
 void ll_assign(Longlong* pll, Longlong* pll2);
 

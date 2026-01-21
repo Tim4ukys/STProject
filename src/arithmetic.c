@@ -1,5 +1,19 @@
 ﻿#include "arithmetic.h"
 #include <memory.h>
+#include <math.h>
+#include <stdbool.h>
+
+#define HI_W(x) (x >> 16)
+#define LO_W(x) (x & 0xffff)
+#define MSb(x)  (x >> 31)
+
+void ll_assign_longlong(Longlong* pll, uint64_t x) {
+    if (!pll)
+        return;
+
+    pll->lo = x & UINT32_MAX;
+    pll->hi = x >> 32;
+}
 
 void ll_assign(Longlong* pll, Longlong* pll2) {
     if (!pll || !pll2)
@@ -216,4 +230,41 @@ void ll_sub1(Longlong* pres, Longlong* px, int32_t y) {
     pres->hi -= 1;
 of:
     return;
+}
+
+
+void ll_umul1(Longlong* pres, uint32_t x, uint32_t y) {
+    ll_assign_long(pres, 0);
+    ll_add1(pres, pres, HI_W(x) * HI_W(y));
+    ll_shiftleft(pres, 16);
+    ll_add1(pres, pres, HI_W(x) * LO_W(y));
+    ll_add1(pres, pres, HI_W(y) * LO_W(x));
+    ll_shiftleft(pres, 16);
+    ll_add1(pres, pres, LO_W(x) * LO_W(y));
+}
+
+void ll_mul1(Longlong* pres, int32_t x, int32_t y) {
+    ll_umul1(pres, abs(x), abs(y));
+    if (MSb(x) != MSb(y))
+        ll_negate(pres);
+}
+
+void ll_mul(Longlong* pres, Longlong* px, Longlong* py) {
+    ll_assign_long(pres, 0);
+    Longlong x, y, tmp;
+    ll_assign(&x, px);
+    ll_assign(&y, py);
+    ll_abs(&x);
+    ll_abs(&y);
+    
+    ll_umul1(&tmp, x.hi, y.lo);
+    ll_add(pres, pres, &tmp);
+    ll_umul1(&tmp, x.lo, y.hi);
+    ll_add(pres, pres, &tmp);
+    ll_shiftleft(pres, 32);
+    ll_umul1(&tmp, x.lo, y.lo);
+    ll_add(pres, pres, &tmp);
+
+    if (ll_sign(px) != ll_sign(py))
+        ll_negate(pres);
 }
