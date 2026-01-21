@@ -244,18 +244,38 @@ void ll_umul1(Longlong* pres, uint32_t x, uint32_t y) {
 }
 
 void ll_mul1(Longlong* pres, int32_t x, int32_t y) {
-    ll_umul1(pres, (uint32_t)x, (uint32_t)y);
+    ll_umul1(pres, abs(x), abs(y));
+
+    if ((MSb(x) != MSb(y)) != MSb(pres->hi)) {
+        if (MSb(pres->hi))
+            pres->hi &= INT32_MAX;
+        else
+            pres->hi |= 1 << 31;
+    }
 }
 
 void ll_mul(Longlong* pres, Longlong* px, Longlong* py) {
     ll_assign_long(pres, 0);
-    Longlong tmp;
+    Longlong tmp, a, b;
+    ll_assign(&a, px);
+    ll_assign(&b, py);
+    ll_abs(&a);
+    ll_abs(&b);
 
-    ll_umul1(&tmp, px->hi, py->lo);
+    ll_umul1(&tmp, a.hi, b.lo);
     ll_add(pres, pres, &tmp);
-    ll_umul1(&tmp, px->lo, py->hi);
+    ll_umul1(&tmp, a.lo, b.hi);
     ll_add(pres, pres, &tmp);
     ll_shiftleft(pres, 32);
-    ll_umul1(&tmp, px->lo, py->lo);
+    ll_umul1(&tmp, a.lo, b.lo);
     ll_add(pres, pres, &tmp);
+
+    /*if ((MSb(px->hi) != MSb(py->hi)) != MSb(pres->hi))
+        pres->hi |= 1 << 31;*/
+    if ((MSb(px->hi) != MSb(py->lo)) != MSb(pres->hi)) {
+        if (MSb(pres->hi))
+            pres->hi &= INT32_MAX;
+        else
+            pres->hi |= 1 << 31;
+    }
 }
