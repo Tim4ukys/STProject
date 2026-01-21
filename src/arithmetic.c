@@ -158,3 +158,62 @@ int ll_ge(Longlong* px, Longlong* py) {
 }
 
 
+void ll_and(Longlong* pres, const Longlong* px, const Longlong* py) {
+    pres->hi = px->hi & py->hi;
+    pres->lo = px->lo & py->lo;
+}
+
+void ll_or(Longlong* pres, const Longlong* px, const Longlong* py) {
+    pres->hi = px->hi | py->hi;
+    pres->lo = px->lo | py->lo;
+}
+
+void ll_xor(Longlong* pres, const Longlong* px, const Longlong* py) {
+    pres->hi = px->hi ^ py->hi;
+    pres->lo = px->lo ^ py->lo;
+}
+
+
+void ll_add(Longlong* pres, Longlong* px, Longlong* py) {
+    pres->hi = px->hi;
+    pres->lo = px->lo + py->lo;
+    __asm {
+        jnc of
+    }
+    pres->hi += 1;
+of:
+    pres->hi += py->hi;
+}
+
+void ll_add1(Longlong* pres, Longlong* px, int32_t y) {
+    pres->hi = px->hi;
+    pres->lo = px->lo + y;
+    __asm {
+        jnc of
+    }
+    pres->hi += 1;
+of:
+    return;
+}
+
+void ll_sub(Longlong* pres, Longlong* px, Longlong* py) {
+    pres->hi = px->hi;
+    pres->lo = px->lo - py->lo;
+    __asm {
+        jnc of
+    }
+    pres->hi -= 1;
+of:
+    pres->hi -= py->hi;
+}
+
+void ll_sub1(Longlong* pres, Longlong* px, int32_t y) {
+    pres->hi = px->hi;
+    pres->lo = px->lo - y;
+    __asm {
+        jnc of
+    }
+    pres->hi -= 1;
+of:
+    return;
+}

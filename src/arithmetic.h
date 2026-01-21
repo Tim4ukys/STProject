@@ -48,9 +48,9 @@ int ll_le(Longlong* px, Longlong* py);          /* x <= y */
 int ll_ge(Longlong* px, Longlong* py);          /* x >= y */
 
 /* побитовые операторы над x и y (результат в res)  */
-int ll_and(Longlong* pres, Longlong* px, const Longlong* py);
-int ll_or(Longlong* pres, Longlong* px, const Longlong* py);
-int ll_xor(Longlong* pres, Longlong* px, const Longlong* py);
+void ll_and(Longlong* pres, const Longlong* px, const Longlong* py);
+void ll_or(Longlong* pres, const Longlong* px, const Longlong* py);
+void ll_xor(Longlong* pres, const Longlong* px, const Longlong* py);
 
 /* сложение */
 void ll_add(Longlong* pres, Longlong* px, Longlong* py);
