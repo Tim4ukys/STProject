@@ -244,9 +244,7 @@ void ll_umul1(Longlong* pres, uint32_t x, uint32_t y) {
 }
 
 void ll_mul1(Longlong* pres, int32_t x, int32_t y) {
-    ll_umul1(pres, abs(x), abs(y));
-    if (MSb(x) != MSb(y))
-        ll_negate(pres);
+    ll_umul1(pres, (uint32_t)x, (uint32_t)y);
 }
 
 void ll_mul(Longlong* pres, Longlong* px, Longlong* py) {
