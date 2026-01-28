@@ -68,7 +68,7 @@ void ll_mul1(Longlong* pres, int32_t x, int32_t y);
 void ll_umul1(Longlong* pres, uint32_t x, uint32_t y); /* беззнаковое */
 
 /* беззнаковое деление */
-void ll_udiv0(Longlong* pres, Longlong* px, int16_t sy);
+void ll_udiv0(Longlong* pres, Longlong* px, uint16_t sy);
 void ll_udiv1(Longlong* pres, Longlong* px, uint32_t ly);
 void ll_udiv(Longlong* pres, Longlong* px, Longlong* py);
 

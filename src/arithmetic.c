@@ -2,6 +2,7 @@
 #include <memory.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define HI_W(x) (x >> 16)
 #define LO_W(x) (x & 0xffff)
@@ -277,5 +278,77 @@ void ll_mul(Longlong* pres, Longlong* px, Longlong* py) {
             pres->hi &= INT32_MAX;
         else
             pres->hi |= 1 << 31;
+    }
+}
+
+void ll_udiv0(Longlong* pres, Longlong* px, uint16_t sy) {
+    ll_assign_long(pres, 0);
+    pres->lo = px->hi / sy;
+    ll_shiftleft(pres, 16);
+    uint32_t d = ((px->hi % sy) << 16) + HI_W(px->lo);
+    ll_add1(pres, pres, d / sy);
+    ll_shiftleft(pres, 16);
+    d = ((d % sy) << 16) + LO_W(px->lo);
+    ll_add1(pres, pres, d / sy);
+}
+
+void ll_udiv1(Longlong* pres, Longlong* px, uint32_t ly) {
+    ll_assign_long(pres, 0);
+
+    uint16_t x[5];
+    memset(x, 0, sizeof(x));
+    memcpy(x, px, sizeof(Longlong));
+    // D1. нормализация
+    while (!(ly >> 31)) {
+        ly <<= 1;
+        __asm {
+            push edi
+            mov edi, 4
+            shl [x+edi*2], 1
+
+            cum:
+            shl [x+edi*2-2], 1
+            jnc shot
+            inc [x+edi*2]
+            shot:
+            dec edi
+            jnz cum
+            pop esi
+        }
+    }
+
+    for (size_t j = 0; j < 3; j++) {
+        // D3. вычисление q 
+        uint32_t p = *(uint32_t*)(x + 3 - j);
+        uint32_t q = p / LO_W(ly), r = p % LO_W(ly);
+
+        while (q * LO_W(ly) > ((r << 16) + *(x + 2 - j))) {
+            r += HI_W(ly);
+            q -= 1;
+        }
+
+        // D4. Умножить и вычесть
+        // y = U4U3U2
+        Longlong y, z;
+        ll_assign_long(&y, 0);
+        memcpy(&y, x + 2 - j, sizeof(uint16_t) * 3);
+
+        // z = q*V1V2
+        ll_umul1(&z, q, ly);
+
+        ll_sub(&y, &y, &z);
+        
+        // D5. Проверка остатка
+        while (ll_sign(&y) == -1) {
+            // D6. Компенсировать сложение
+            ll_add1(&y, &y, ly);
+            q--;
+        }
+
+        // D4. Присваиваю
+        memcpy(x + 2 - j, &y, sizeof(uint16_t)*3);
+
+        ll_shiftleft(pres, 16);
+        ll_add1(pres, pres, q);
     }
 }
